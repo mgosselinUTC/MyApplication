@@ -127,12 +127,17 @@ public class MainActivity extends Activity implements
 
     private long updates = 0;
 
+    private Location zero = null;
+
     @Override
     public void onLocationChanged(Location location) {
+        if(zero == null) {
+            zero = location;
+        }
         updates ++;
         TextView view = (TextView)findViewById(R.id.textView);
-        view.setText("" + Math.abs(location.getLatitude()) + " " + (location.getLatitude() > 0 ? "N" : "S") + "\n");
-        view.append("" + Math.abs(location.getLongitude()) + " " + (location.getLongitude() > 0 ? "E" : "W") + "\n\n");
+        view.setText("" + Math.abs(location.getLatitude()) + " " + (location.getLatitude() > 0 ? "N" : "S") + "(" + (location.getLatitude() - zero.getLatitude()) + ")" + "\n");
+        view.append("" + Math.abs(location.getLongitude()) + " " + (location.getLongitude() > 0 ? "E" : "W") + "(" + (location.getLongitude() - zero.getLongitude()) + ")" + "\n\n");
         view.append("Update " + updates);
 
     }
