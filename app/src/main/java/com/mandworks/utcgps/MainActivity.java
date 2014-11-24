@@ -17,8 +17,6 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 
-import java.util.Date;
-
 public class MainActivity extends Activity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
@@ -26,16 +24,15 @@ public class MainActivity extends Activity implements
 
     private LocationRequest mLocationRequest;
     private boolean requesting = false;
+    private LocationClient locationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //give that button a listener
+        //button listener
         findViewById(R.id.button).setOnClickListener(this);
-
-
     }
 
     private void startRequesting() {
@@ -51,13 +48,10 @@ public class MainActivity extends Activity implements
 
     }
 
-    private LocationClient locationClient;
 
     public void onResume() {
         super.onResume();
-
-
-
+        startRequesting();
     }
 
     @Override
@@ -82,9 +76,14 @@ public class MainActivity extends Activity implements
         return super.onOptionsItemSelected(item);
     }
 
+    public void onPause() {
+        super.onPause();
+        stopRequesting();
+    }
+
     @Override
     public void onConnected(Bundle bundle) {
-        Toast.makeText(this, "Successfully connected to google play services' location service", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Successfully connected to google play services' location service", Toast.LENGTH_LONG).show();
 
         //once we connect, start requesting updates
 
@@ -94,9 +93,9 @@ public class MainActivity extends Activity implements
         mLocationRequest.setPriority(
                 LocationRequest.PRIORITY_HIGH_ACCURACY);
         // Set the update interval to 5 seconds
-        mLocationRequest.setInterval(100);
+        mLocationRequest.setInterval(1000);
         // Set the fastest update interval to 1 second
-        mLocationRequest.setFastestInterval(100);
+        mLocationRequest.setFastestInterval(1000);
 
         locationClient.requestLocationUpdates(mLocationRequest, this);
 
@@ -114,31 +113,95 @@ public class MainActivity extends Activity implements
 
     }
 
+
     @Override
     public void onClick(View v) {
-        Log.d("Events", "" + v.getId());
-        if(requesting) stopRequesting();
-        else startRequesting();
+        setOriginToCurent();
+    }
+
+    private void setOriginToCurent() {
+        if(currentLocation != null) {
+            zero = currentLocation;
+            Log.d("Origin", format(currentLocation, " "));
+        }
+    }
+
+    private String format(Location location, String separator) {
+
+        double lat = location.getLatitude() * ACCURACY;
+        lat = (int) lat;
+        lat /= ACCURACY;
+        double lon = location.getLongitude() * ACCURACY;
+        lon = (int) lon;
+        lon /= ACCURACY;
+
+        return "" + Math.abs(lat) + " " + (lat > 0 ? "N" : "S") + separator
+        + "" + Math.abs(lon) + " " + (lon > 0 ? "E" : "W");
+
     }
 
     private void stopRequesting() {
         locationClient.disconnect();
+        requesting = false;
     }
 
     private long updates = 0;
 
     private Location zero = null;
+    private Location currentLocation = null;
+
+    private final static double ACCURACY = Math.pow(10  , 5);
 
     @Override
     public void onLocationChanged(Location location) {
-        if(zero == null) {
-            zero = location;
-        }
+
+        currentLocation = location;
+
+        //place, coords
+        //IT, 4482123 N
+        //    687412 W
+
+        //IT, 4482123 N
+        //    6874118 W
+
+        //IT, 4482123 N
+        //    6874118 W
+
+        //IT, 4482123 N
+        //    6874118 W
+
+        //IT, 4482123 N
+        //    6874118 W
+
+        //IT, 4482123 N
+        //    6874118 W
+
+        //IT, 4482123 N
+        //    6874118 W
+
+        //IT, 4482123 N
+        //    6874118 W
+
         updates ++;
-        TextView view = (TextView)findViewById(R.id.textView);
-        view.setText("" + Math.abs(location.getLatitude()) + " " + (location.getLatitude() > 0 ? "N" : "S") + "(" + (location.getLatitude() - zero.getLatitude()) + ")" + "\n");
-        view.append("" + Math.abs(location.getLongitude()) + " " + (location.getLongitude() > 0 ? "E" : "W") + "(" + (location.getLongitude() - zero.getLongitude()) + ")" + "\n\n");
-        view.append("Update " + updates);
+        TextView mainView = (TextView)findViewById(R.id.textView);
+        TextView zeroView = (TextView)findViewById(R.id.zeroLocation);
+
+        double lat = location.getLatitude() * ACCURACY;
+        lat = (int) lat;
+        lat /= ACCURACY;
+        double lon = location.getLongitude() * ACCURACY;
+        lon = (int) lon;
+        lon /= ACCURACY;
+
+        mainView.setText("Absolute Coordinates:\n");
+        mainView.append(format(location, "\n"));
+        if(zero != null) {
+            zeroView.setText("\nDistance From Origin: ");
+            zeroView.append("" + zero.distanceTo(location) + " meters");
+        } else {
+            zeroView.setText("Origin not set.");
+        }
+
 
     }
 }

@@ -4,5 +4,7 @@
     <string name="app_name">UTC GPS</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="mainText">Determining Current Location...</string>
+    <string name="zero">Set Origin</string>
 
 </resources>
